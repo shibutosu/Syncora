@@ -1,0 +1,8 @@
+<resources>
+    <style name="Theme.Office" parent="Theme.Material3.DayNight">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:windowBackground">#FF161616</item> <!-- Цвет фона окна -->
+    </style>
+</resources>
