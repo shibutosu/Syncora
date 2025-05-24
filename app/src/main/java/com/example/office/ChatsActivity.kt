@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.office.presentation.common.components.BottomNavigationBar
+import com.example.office.presentation.common.components.NavigationItem
 import com.example.office.ui.theme.AppTheme
 import com.example.office.ui.theme.ThemeState
 

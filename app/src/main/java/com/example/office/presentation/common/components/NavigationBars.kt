@@ -1,4 +1,4 @@
-package com.example.office
+package com.example.office.presentation.common.components
 
 import android.app.Activity
 import android.content.Intent
@@ -23,6 +23,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.office.ChatsActivity
+import com.example.office.presentation.calendar.CalendarActivity
+import com.example.office.presentation.main.MainActivity
+import com.example.office.presentation.profile.ProfileActivity
 
 enum class NavigationItem {
     Home, Search, Chats, Calendar, Profile
@@ -70,7 +74,7 @@ fun BottomNavigationBar(
             selected = selectedItem == NavigationItem.Search,
             onClick = {
                 if (selectedItem != NavigationItem.Search) {
-                    context.startActivity(Intent(context, SearchApiActivity::class.java))
+                    context.startActivity(Intent(context, com.example.office.presentation.search.SearchActivity::class.java))
                 }
             },
             colors = NavigationBarItemDefaults.colors(
@@ -108,7 +112,7 @@ fun BottomNavigationBar(
             selected = selectedItem == NavigationItem.Calendar,
             onClick = {
                 if (selectedItem != NavigationItem.Calendar) {
-                    context.startActivity(Intent(context, TodayTaskActivity::class.java))
+                    context.startActivity(Intent(context, CalendarActivity::class.java))
                 }
             },
             colors = NavigationBarItemDefaults.colors(

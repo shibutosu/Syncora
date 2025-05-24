@@ -71,6 +71,8 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 import androidx.core.content.edit
 import kotlinx.coroutines.FlowPreview
+import com.example.office.presentation.common.components.BottomNavigationBar
+import com.example.office.presentation.common.components.NavigationItem
 
 interface UnsplashApi {
     @GET("search/photos")
