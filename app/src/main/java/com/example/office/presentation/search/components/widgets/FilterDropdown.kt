@@ -1,12 +1,11 @@
 package com.example.office.presentation.search.components.widgets
 
-import androidx.compose.foundation.background
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun FilterDropdown(
@@ -14,23 +13,17 @@ fun FilterDropdown(
     showFilters: Boolean,
     selectedFilter: String,
     onDismiss: () -> Unit,
-    onSelect: (String) -> Unit
+    onSelect: (String) -> Unit,
+    offset: DpOffset = DpOffset.Zero
 ) {
-    val colors = MaterialTheme.colorScheme
-
     DropdownMenu(
         expanded = showFilters,
         onDismissRequest = onDismiss,
-        modifier = Modifier.background(colors.surface)
+        offset = offset
     ) {
         filters.forEach { filter ->
             DropdownMenuItem(
-                text = {
-                    Text(
-                        text = filter,
-                        color = if (filter == selectedFilter) colors.primary else colors.onSurfaceVariant
-                    )
-                },
+                text = { Text(filter) },
                 onClick = { onSelect(filter) }
             )
         }

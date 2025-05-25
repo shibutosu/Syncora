@@ -63,6 +63,9 @@ dependencies {
     // Material Design 3
     implementation(libs.androidx.material3)
     implementation("com.google.android.material:material:1.12.0")
+    implementation(libs.androidx.material3.v120)
+    implementation(platform("androidx.compose:compose-bom:2023.10.01"))
+    implementation("androidx.compose.material3:material3")
 
 
     // Иконки Material

@@ -28,6 +28,8 @@ class MainActivity : ComponentActivity() {
         window.statusBarColor = android.graphics.Color.TRANSPARENT
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
 
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+
         setContent {
             val themeState = remember { ThemeState(this) }
 
