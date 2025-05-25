@@ -1,5 +1,6 @@
 package com.example.office.presentation.search
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -28,13 +29,27 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.office.data.repository.TaskRepository
 import com.example.office.presentation.common.components.BottomNavigationBar
 import com.example.office.presentation.common.components.NavigationItem
+import com.example.office.presentation.main.TaskViewModelFactory
+import com.example.office.presentation.main.model.TaskItem
+import com.example.office.presentation.main.viewmodel.TaskViewModel
+import com.example.office.presentation.search.components.widgets.SearchResultItem
+import com.example.office.presentation.search.model.OfficeSearchResult
 import com.example.office.ui.theme.ThemeState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+
+private fun TaskItem.toOfficeSearchResult(): OfficeSearchResult =
+    OfficeSearchResult(
+        title = this.title,
+        type = if (this.done) "Выполнено" else "Активно",
+        category = "Tasks"
+    )
 
 @Composable
 fun SearchScreen(
@@ -44,11 +59,21 @@ fun SearchScreen(
     onClearHistory: () -> Unit,
 ) {
     val insets = WindowInsets.statusBars.asPaddingValues()
+    val context = LocalContext.current
+
+    val tokenProvider: suspend () -> String = {
+        context.getSharedPreferences("auth", Context.MODE_PRIVATE).getString("jwt", "") ?: ""
+    }
+
+    val viewModel: TaskViewModel = viewModel(
+        factory = TaskViewModelFactory(TaskRepository(com.example.office.data.remote.ApiClient.api, tokenProvider))
+    )
+
     var searchQuery by rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("")) }
     var isLoading by remember { mutableStateOf(false) }
     var searchError by remember { mutableStateOf(false) }
     var showHistory by remember { mutableStateOf(false) }
-    var searchResults by remember { mutableStateOf<List<String>>(emptyList()) }
+    var searchResults by remember { mutableStateOf<List<OfficeSearchResult>>(emptyList()) }
     var lastQuery by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     var searchJob by remember { mutableStateOf<Job?>(null) }
@@ -57,19 +82,37 @@ fun SearchScreen(
     var showFilters by remember { mutableStateOf(false) }
     var filterIconOffset by remember { mutableStateOf(IntOffset.Zero) }
 
+    // Грузим задачи с бэка при первом запуске
+    LaunchedEffect(Unit) {
+        viewModel.loadTasks()
+    }
+
+    // Показываем все задачи при входе (до 10), если поле поиска пустое
+    LaunchedEffect(viewModel.tasks, searchQuery.text) {
+        if (searchQuery.text.isBlank()) {
+            searchResults = viewModel.tasks.take(10).map { it.toOfficeSearchResult() }
+        }
+    }
+
     fun performSearch(query: String) {
         isLoading = true
         searchError = false
         lastQuery = query
         coroutineScope.launch {
-            delay(1000) // имитация задержки поиска
+            delay(300)
             isLoading = false
-            if (query == "error") {
+            try {
+                val filtered = viewModel.tasks.filter { task ->
+                    if (query.isBlank()) false
+                    else
+                        task.title.contains(query, ignoreCase = true) ||
+                                task.description.contains(query, ignoreCase = true)
+                }.map { it.toOfficeSearchResult() }
+                searchResults = filtered
+                if (filtered.isNotEmpty()) onAddToHistory(query)
+            } catch (e: Exception) {
                 searchError = true
                 searchResults = emptyList()
-            } else {
-                searchResults = if (query.isBlank()) emptyList() else List(3) { "$query результат ${it + 1}" }
-                if (searchResults.isNotEmpty()) onAddToHistory(query)
             }
         }
     }
@@ -82,10 +125,9 @@ fun SearchScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                // ↓↓↓ САМЫЙ КОМПАКТНЫЙ ОТСТУП ↓↓↓
                 .padding(top = insets.calculateTopPadding().coerceAtMost(8.dp), start = 16.dp, end = 16.dp, bottom = 0.dp)
         ) {
-            // Поисковая строка как ты просил
+            // Поисковая строка (логика как в твоём эталоне!)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -106,11 +148,11 @@ fun SearchScreen(
                         searchJob?.cancel()
                         if (it.text.isNotBlank()) {
                             searchJob = coroutineScope.launch {
-                                delay(1000)
+                                delay(350)
                                 performSearch(it.text)
                             }
                         } else {
-                            searchResults = emptyList()
+                            // тут searchResults обновит LaunchedEffect выше, чтобы отобразить 10 первых
                         }
                     },
                     textStyle = TextStyle(
@@ -146,7 +188,7 @@ fun SearchScreen(
                                 searchQuery = TextFieldValue("")
                                 keyboardController?.hide()
                                 showHistory = searchHistory.isNotEmpty()
-                                searchResults = emptyList()
+                                // тут тоже searchResults обновит LaunchedEffect выше
                             }
                     )
                 }
@@ -228,6 +270,11 @@ fun SearchScreen(
                         }
                     }
                 }
+                searchQuery.text.isBlank() && searchResults.isEmpty() && !isLoading -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Нет задач для отображения")
+                    }
+                }
                 searchQuery.text.isNotBlank() && searchResults.isEmpty() && !isLoading -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("Ничего не найдено")
@@ -236,14 +283,7 @@ fun SearchScreen(
                 searchResults.isNotEmpty() -> {
                     LazyColumn {
                         items(searchResults) { result ->
-                            ListItem(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        onAddToHistory(result)
-                                    },
-                                headlineContent = { Text(result) }
-                            )
+                            SearchResultItem(result)
                             Divider()
                         }
                     }
