@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun DashboardScreen() {
@@ -38,7 +39,7 @@ fun DashboardScreen() {
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Box(modifier = Modifier.weight(3f)) {
-                        DailyTasksCard(tasksDone = 8, tasksTotal = 10)
+                        DailyTasksCard(viewModel = viewModel())
                     }
                 }
 

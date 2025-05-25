@@ -41,6 +41,12 @@ class TaskViewModel(private val repository: TaskRepository) : ViewModel() {
     fun updateTask(id: Long, title: String, description: String, done: Boolean) {
         viewModelScope.launch {
             repository.updateTask(id, title, description, done)
+
+            // 🔁 Обновляем в локальном списке
+            tasks = tasks.map {
+                if (it.id == id) it.copy(title = title, description = description, done = done)
+                else it
+            }
         }
     }
 

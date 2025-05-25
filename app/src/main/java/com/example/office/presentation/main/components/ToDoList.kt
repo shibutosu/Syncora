@@ -42,8 +42,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.office.data.remote.ApiClient
 import com.example.office.data.repository.TaskRepository
+import com.example.office.presentation.main.TaskViewModelFactory
 import com.example.office.presentation.main.viewmodel.TaskViewModel
-import com.example.office.presentation.main.viewmodel.TaskViewModelFactory
 import kotlinx.coroutines.launch
 
 @Composable
@@ -90,7 +90,31 @@ fun ToDoList() {
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 16.dp)
         ) {
-            Text("To do today", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = taskTextColor)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "To do today",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = taskTextColor,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Добавить",
+                    modifier = Modifier
+                        .clickable {
+                            showDialog = true
+                            editingTaskId = null
+                            newTitle = ""
+                            newDescription = ""
+                        }
+                        .padding(8.dp)
+                )
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
 
             when {
@@ -153,20 +177,6 @@ fun ToDoList() {
                     Spacer(modifier = Modifier.height(55.dp))
                 }
             }
-        }
-
-        FloatingActionButton(
-            onClick = {
-                showDialog = true
-                editingTaskId = null
-                newTitle = ""
-                newDescription = ""
-            },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 12.dp)
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Добавить")
         }
 
         if (showDialog) {

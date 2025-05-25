@@ -10,10 +10,11 @@ import androidx.compose.ui.graphics.Color
 import com.example.office.presentation.common.components.BottomNavigationBar
 import com.example.office.presentation.common.components.NavigationItem
 import com.example.office.presentation.main.components.*
+import com.example.office.presentation.main.viewmodel.TaskViewModel
 import com.example.office.ui.theme.ThemeState
 
 @Composable
-fun MainScreen(themeState: ThemeState) {
+fun MainScreen(themeState: ThemeState, taskViewModel: TaskViewModel) {
     Scaffold(
         bottomBar = {
             BottomNavigationBar(selectedItem = NavigationItem.Home)

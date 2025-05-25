@@ -16,10 +16,15 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.office.presentation.main.viewmodel.TaskViewModel
 
 @Composable
-fun DailyTasksCard(tasksDone: Int, tasksTotal: Int) {
-    val progress = if (tasksTotal > 0) tasksDone.toFloat() / tasksTotal else 0f
+fun DailyTasksCard(viewModel: TaskViewModel) {
+    val tasks = viewModel.tasks
+
+    val done = tasks.count { it.done }
+    val total = tasks.size
+    val progress = if (total > 0) done.toFloat() / total else 0f
 
     Row(
         modifier = Modifier
@@ -37,7 +42,7 @@ fun DailyTasksCard(tasksDone: Int, tasksTotal: Int) {
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "$tasksDone out of $tasksTotal done",
+                text = "$done out of $total done",
                 fontSize = 14.sp,
                 color = Color.Gray
             )

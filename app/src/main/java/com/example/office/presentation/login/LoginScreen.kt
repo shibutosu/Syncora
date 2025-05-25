@@ -28,7 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import androidx.core.content.edit
+import com.example.office.data.local.TokenDataStore
 
 @Composable
 fun LoginScreen() {
@@ -93,36 +93,26 @@ fun LoginScreen() {
                         value = fullName,
                         onValueChange = { fullName = it },
                         label = { Text("Full Name", color = colors.onSurfaceVariant) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                     )
-
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
                         label = { Text("Username", color = colors.onSurfaceVariant) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                     )
-
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
                         label = { Text("Email", color = colors.onSurfaceVariant) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                     )
                 } else {
                     OutlinedTextField(
                         value = login,
                         onValueChange = { login = it },
                         label = { Text("Login", color = colors.onSurfaceVariant) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                     )
                 }
 
@@ -139,9 +129,7 @@ fun LoginScreen() {
                             )
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                 )
 
                 if (isRegister) {
@@ -158,9 +146,7 @@ fun LoginScreen() {
                                 )
                             }
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                     )
                 }
 
@@ -169,7 +155,7 @@ fun LoginScreen() {
                 if (message != null) {
                     Text(
                         text = message ?: "",
-                        color = if (message!!.contains("успешно", ignoreCase = true) || message!!.contains("success", ignoreCase = true)) Color(0xFF4CAF50) else Color.Red,
+                        color = if (message!!.contains("успешно", true) || message!!.contains("success", true)) Color(0xFF4CAF50) else Color.Red,
                         fontSize = 16.sp,
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
@@ -186,12 +172,7 @@ fun LoginScreen() {
                                     message = "Пароли не совпадают"
                                     return@Button
                                 }
-                                if (
-                                    fullName.text.isBlank() ||
-                                    username.text.isBlank() ||
-                                    email.text.isBlank() ||
-                                    password.text.isBlank()
-                                ) {
+                                if (fullName.text.isBlank() || username.text.isBlank() || email.text.isBlank() || password.text.isBlank()) {
                                     message = "Заполните все поля"
                                     return@Button
                                 }
@@ -207,9 +188,10 @@ fun LoginScreen() {
                                         isLoading = false
                                         result.fold(
                                             onSuccess = { authResponse ->
-                                                // успешная регистрация и логин, сохрани токен и перейди в MainActivity
-                                                context.getSharedPreferences("auth", 0).edit {
-                                                    putString("jwt", authResponse.token)
+                                                withContext(Dispatchers.IO) {
+                                                    TokenDataStore.saveToken(context,
+                                                        authResponse.token.toString()
+                                                    )
                                                 }
                                                 message = "Регистрация и вход прошли успешно!"
                                                 context.startActivity(Intent(context, MainActivity::class.java))
@@ -231,8 +213,8 @@ fun LoginScreen() {
                                     withContext(Dispatchers.Main) {
                                         isLoading = false
                                         if (response.token != null) {
-                                            context.getSharedPreferences("auth", 0).edit {
-                                                putString("jwt", response.token)
+                                            withContext(Dispatchers.IO) {
+                                                TokenDataStore.saveToken(context, response.token)
                                             }
                                             message = "Вход выполнен успешно!"
                                             context.startActivity(Intent(context, MainActivity::class.java))
@@ -243,10 +225,7 @@ fun LoginScreen() {
                                 }
                             }
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .height(50.dp),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).height(50.dp),
                         shape = RoundedCornerShape(25.dp)
                     ) {
                         Text(
